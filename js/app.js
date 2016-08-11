@@ -45,14 +45,6 @@ var places = [
 		tags: ['food']
 	},
 	{
-		name: 'Northeast Kingdom',
-		address: '18 Wyckoff Ave, Brooklyn, NY 11237',
-		lat: 40.706360,
-		lng: -73.922870,
-		info: 'Farm-to-table New American Meals',
-		tags: ['food']
-	},
-	{
 		name: 'McGee\'s',
 		address: '240 W 55th St, New York, NY 10019',
 		lat: 40.764892,
@@ -340,8 +332,13 @@ var ViewModel = function() {
 // empty view model
 var vm = new ViewModel();
 
-// listener for view model initialization
-$( document ).ready(function() {
+/**
+ * This fires once the dom is loaded, which means all of the javascript and
+ * css should also be ready.  It applies the knockout view bindings from
+ * the view model, which also puts into place all of the instantiations and
+ * logic setup
+ */
+$(function(){
 	vm.init();
 	ko.applyBindings(vm);
 
