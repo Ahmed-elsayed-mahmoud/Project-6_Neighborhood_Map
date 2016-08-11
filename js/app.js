@@ -67,18 +67,16 @@ var places = [
 // *         GOOGLE MAPS         *
 // *******************************
 var gMap = {
-	map: {},
-	infoWindow: new google.maps.InfoWindow(), 
-	options: {
-		center: { lat: 40.74390243309498, lng: -73.9486100842285},
-		zoom: 12
-	},
-	infoWindowContent: '<div class="info-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>',
-	init: function(vm) {
-		gMap.map = new google.maps.Map(document.getElementById('map'), gMap.options);
-		// shows markers depending on which loads faster - vm or google map
-		if (vm.initialized && !vm.hasMarkers) vm.showMarkers();
-	}
+  options: {
+    center: { lat: 40.74390243309498, lng: -73.9486100842285},
+    zoom: 12
+  },
+  infoWindowContent:'<div class="info-window"><div class="window-title">%title%</div><div class="window-description">%description%</div></div>',
+  init: function(vm) {
+    gMap.map = new google.maps.Map(document.getElementById('map'), gMap.options);
+    gMap.infoWindow = new google.maps.InfoWindow();
+    vm.showMarkers();
+  }
 };
 
 // *******************************
@@ -261,16 +259,18 @@ var ViewModel = function() {
 				url: 'https://api.foursquare.com/v2/venues/search?ll='+place.lat()+','+place.lng()+'&intent=match&name='+place.name()+'&client_id=5ZPHOZSSOIEHWPYI4U5BBM42EXBJOYQIY1LBR1RZ3LIGNQG1&client_secret=HRH0UQDDMCO2JKC2NHJMJYRU2N05SQ4TGDHFHGZEQODZBX4S&v=20150326'
 			})
 			.done(function(data){
-				var venue = data.response.venues[0];
+				if (data.response.venues[0]) {
+					var venue = data.response.venues[0];
 
-				//set fetched info as properties of Place object
-				place.id = ko.observable(venue.id);
+					//set fetched info as properties of Place object
+					place.id = ko.observable(venue.id);
 
-				if (venue.hasOwnProperty('url')) {
-					place.url = ko.observable(venue.url);
-				}
-				if (venue.hasOwnProperty('contact') && venue.contact.hasOwnProperty('formattedPhone')) {
-					place.phone = ko.observable(venue.contact.formattedPhone);
+					if (venue.hasOwnProperty('url')) {
+						place.url = ko.observable(venue.url);
+					}
+					if (venue.hasOwnProperty('contact') && venue.contact.hasOwnProperty('formattedPhone')) {
+						place.phone = ko.observable(venue.contact.formattedPhone);
+					}
 				}
 
 				// use id to get photo
@@ -332,21 +332,8 @@ var ViewModel = function() {
 // empty view model
 var vm = new ViewModel();
 
-/**
- * This fires once the dom is loaded, which means all of the javascript and
- * css should also be ready.  It applies the knockout view bindings from
- * the view model, which also puts into place all of the instantiations and
- * logic setup
- */
-$(function(){
-	vm.init();
-	ko.applyBindings(vm);
-
-	// resize map and reset center when window size changes
-	$(window).on('resize', function() {
-		google.maps.event.trigger(gMap.map, 'resize');
-		gMap.map.setCenter(gMap.options.center);
-	});
-});
-// listener for google map initialization
-google.maps.event.addDomListener(window, 'load', gMap.init(vm));
+function fireApp() {
+    vm.init();
+    ko.applyBindings(vm);
+    gMap.init(vm);
+}
